@@ -1,0 +1,43 @@
+import os
+from shutil import copy
+path = "./examples-main/imagenet/data/val"
+filename = "val_annotations.txt" 
+
+def move_images(path,filename):
+    with open(path+filename,'r') as f:
+        data = f.readlines()
+
+    names = []
+    labels = []
+    texts = []
+    for i in range(len(data)):
+        line = data[i].split()
+        names.append(line[0])
+        labels.append(line[1])
+        texts.append(line[2:])
+
+    print(names[0:10])
+    print(labels[0:10])
+    print(texts[0:10])
+
+    for i in range(10000):
+        if os.path.exists(path+'val/'+labels[i]):
+            copy(path+"images/"+names[i],path+'val/'+labels[i]+'/images/')
+        else:
+            os.makedirs(path+'val/'+labels[i])
+            os.makedirs(path+'val/'+labels[i]+'/images/')
+            copy(path+"images/"+names[i],path+'val/'+labels[i]+'/images/')
+    return labels,names,texts
+
+def get_annotations(path,labels,names,texts):
+    dir_list = os.listdir(path+'val')
+    for dir_name in dir_list:
+        with open(path+'val/'+dir_name+'/'+dir_name+'_boxes.txt','w')as f:
+            for i in range(10000):
+                if labels[i] == dir_name:
+                    f.write(str(names[i])+'\t'+str(texts[i][0])+'\t'+str(texts[i][1])+'\t'+str(texts[i][2])+'\t'+str(texts[i][0])+'\n')
+    return True
+
+if __name__ == '__main__':
+    labels,names,texts = move_images(path,filename)
+    get_annotations(path,labels,names,texts)
